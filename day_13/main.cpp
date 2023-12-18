@@ -37,127 +37,69 @@ InputData Day12::ParseInputs(std::ifstream& data) {
 }
 
 long find_vertical_mirror(const Terrain& terrain) {
-	std::vector<long> candidates{}; candidates.resize(terrain[0].size() - 2);
-	std::iota(candidates.begin(), candidates.end(), 1);
+	std::vector<long> candidates{}; candidates.resize(terrain[0].size() - 1);
+	std::iota(candidates.begin(), candidates.end(), 0);
 
-	long y{0};
-	while (candidates.size() > 1) {
+	for (long y{0}; y < terrain.size(); ++y) {
+		if (candidates.empty()) { break; }
 		std::vector<long> next_candidates{};
+
 		for (const auto& candidate : candidates) {
-			const auto dist = std::min(candidate, static_cast<long>(terrain[0].size()) - 1 - candidate);
-			std::cout << candidate << " " << static_cast<long>(terrain[0].size()) - 1 - candidate << " -> " << dist << std::endl;
+			long lhs = candidate;
+			long rhs = candidate + 1;
 
-			bool mirror {true};
-			for (long x{0}; x < dist; ++x) {
-				const auto lhs = candidate - x;
-				const auto rhs = candidate + 1 + x;
+			bool is_mirror {true};
 
+			while (lhs >= 0 && rhs < terrain[0].size()) {
 				if (terrain[y][lhs] != terrain[y][rhs]) {
-					mirror = false;
+					is_mirror = false;
 					break;
 				}
+				--lhs;
+				++rhs;
 			}
-			if (mirror) {
+
+			if (is_mirror) {
 				next_candidates.push_back(candidate);
 			}
 		}
-		candidates = next_candidates;
-		++y;
-	}
 
-	std::cout << (candidates.size() == 1 ? candidates[0] + 1 : 0) << " = " << (candidates.size() == 1 ? candidates[0] + 1 : 0) << std::endl;
+		candidates = next_candidates;
+	}
 
 	return (candidates.size() == 1 ? candidates[0] + 1 : 0);
 }
 
 long find_horizontal_mirror(const Terrain& terrain) {
-	std::vector<long> candidates{}; candidates.resize(terrain.size() - 2);
-	std::iota(candidates.begin(), candidates.end(), 1);
-
-	// long x{0};
-	// while (candidates.size() > 1) {
-	// 	std::vector<long> next_candidates{};
-	// 	for (const auto& candidate : candidates) {
-	// 		const auto dist = std::min(candidate, static_cast<long>(terrain.size()) - 2 - candidate);
-	// 		std::cout << candidate << " " << static_cast<long>(terrain.size()) - 2 - candidate << " -> " << dist << std::endl;
-
-	// 		bool mirror {true};
-	// 		for (long y{0}; y <= dist; ++y) {
-	// 			const auto lhs = candidate - y;
-	// 			const auto rhs = candidate + 1 + y;
-	// 			std::cout << "  > " << lhs << " (" << terrain[lhs][x] << ") " << rhs << " (" << terrain[rhs][x] << ") " << std::endl;
-
-	// 			if (terrain[lhs][x] != terrain[rhs][x]) {
-	// 				std::cout << "Not equal" << std::endl;
-	// 				mirror = false;
-	// 				break;
-	// 			}
-	// 		}
-	// 		if (mirror) {
-	// 			next_candidates.push_back(candidate);
-	// 		}
-	// 	}
-	// 	candidates = next_candidates;
-	// 	++x;
-	// }
-
-	// if (candidates.empty()) {
-	// 	return 0;
-	// }
-
-	// // TODO: Merge two for cycles. Remove While() and iterate through all the x's. Break if no candidates are available.
-
-	// const auto dist = std::min(candidates[0], static_cast<long>(terrain.size()) - 2 - candidates[0]);
-	// for (; x < terrain[0].size(); ++x) {
-	// 	bool mirror {true};
-	// 	for (long y{0}; y <= dist; ++y) {
-	// 		const auto lhs = candidates[0] - y;
-	// 		const auto rhs = candidates[0] + 1 + y;
-	// 		std::cout << "  > " << lhs << " (" << terrain[lhs][x] << ") " << rhs << " (" << terrain[rhs][x] << ") " << std::endl;
-
-	// 		if (terrain[lhs][x] != terrain[rhs][x]) {
-	// 			std::cout << "Not equal" << std::endl;
-	// 			mirror = false;
-	// 			break;
-	// 		}
-	// 	}
-	// 	if (!mirror) {
-	// 		candidates.clear();
-	// 	}
-	// }
+	std::vector<long> candidates{}; candidates.resize(terrain.size() - 1);
+	std::iota(candidates.begin(), candidates.end(), 0);
 
 	for (long x{0}; x < terrain[0].size(); ++x) {
 		if (candidates.empty()) { break; }
-
 		std::vector<long> next_candidates{};
 
 		for (const auto& candidate : candidates) {
-			bool mirror{true};
-			for (long y{0}; y < candidates.size(); ++y) {
-				const auto lhs = candidate - y;
-				const auto rhs = candidate + 1 + y;
+			long lhs = candidate;
+			long rhs = candidate + 1;
 
-				std::cout << "  > " << lhs << " (" << terrain[lhs][x] << ") " << rhs << " (" << terrain[rhs][x] << ") " << std::endl;
+			bool is_mirror {true};
 
-				if (lhs < 0) { break; }
-				if (rhs >= candidates.size()) { break; }
-
+			while (lhs >= 0 && rhs < terrain.size()) {
 				if (terrain[lhs][x] != terrain[rhs][x]) {
-					std::cout << "Not equal" << std::endl;
-					mirror = false;
+					is_mirror = false;
 					break;
 				}
+				--lhs;
+				++rhs;
 			}
-			if (mirror) {
-				std::cout << "Equal" << std::endl;
+
+			if (is_mirror) {
 				next_candidates.push_back(candidate);
 			}
 		}
 
 		candidates = next_candidates;
 	}
-
-	std::cout << "Candidates: " << candidates.size() << std::endl;
 
 	return (candidates.size() == 1 ? candidates[0] + 1 : 0);
 }
