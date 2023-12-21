@@ -1,7 +1,7 @@
 #include <algorithm>
+#include <numeric>
 #include <vector>
 #include <string>
-#include <array>
 
 #include "../common/utils.hpp"
 #include "../common/AoCDay.hpp"
@@ -122,8 +122,8 @@ Platform spin_cycle_platform_for(Platform platform, long n_spin_cycles) {
 				const long pattern_start = i;
 				const long pattern_size = cached_spin_cycles.size() - pattern_start;
 				const long remaining_cycles = n_spin_cycles - n_spin - 1;
-				const long pos_in_pattern = remaining_cycles % pattern_size;
-				return cached_spin_cycles[pattern_start + pos_in_pattern];
+				const long final_pos_in_pattern = remaining_cycles % pattern_size;
+				return cached_spin_cycles[pattern_start + final_pos_in_pattern];
 			}
 		}
 
@@ -150,30 +150,28 @@ long Day14::PartOne(const InputData& data) const {
 
 	TiltNorth(platform);
 
-	long result{0};
-
-	for (long y {0}; y < platform.size(); ++y) {
-		const auto& row = platform[y];
-		long rocks = std::count(row.cbegin(), row.cend(), 'O');
-		result += rocks * (platform.size() - y);
-	}
-
-	return result;
+	return std::accumulate(
+		platform.cbegin(), platform.cend(), 0L,
+		[n_rows = platform.size()](long result, const std::string& row){
+			static long line_load{static_cast<long>(n_rows)};
+			long round_rocks = std::count(row.cbegin(), row.cend(), 'O');
+			return result + round_rocks * line_load--;
+		}
+	);
 }
 
 long Day14::PartTwo(const InputData& data) const {
 	const long total_spin_cycles = 1000000000;
 	Platform platform = spin_cycle_platform_for(data, total_spin_cycles);
 
-	long result{0};
-
-	for (long y {0}; y < platform.size(); ++y) {
-		const auto& row = platform[y];
-		long rocks = std::count(row.cbegin(), row.cend(), 'O');
-		result += rocks * (platform.size() - y);
-	}
-
-	return result;
+	return std::accumulate(
+		platform.cbegin(), platform.cend(), 0L,
+		[n_rows = platform.size()](long result, const std::string& row){
+			static long line_load{static_cast<long>(n_rows)};
+			long round_rocks = std::count(row.cbegin(), row.cend(), 'O');
+			return result + round_rocks * line_load--;
+		}
+	);
 }
 
 int main(int argc, char* argv[]) {
