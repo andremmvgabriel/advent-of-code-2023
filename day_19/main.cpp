@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <queue>
 
 #include "../common/utils.hpp"
 #include "../common/AoCDay.hpp"
@@ -94,16 +95,12 @@ long Day19::PartOne(const InputData& data) const {
 		std::string curr_workflow = "in";
 		std::string outcome = "";
 
-		std::cout << "Part: x" << part.x << " m" << part.m << " a" << part.a << " s" << part.s << std::endl;
-
 		while (outcome != "R" && outcome != "A") {
 			const auto& workflow = workflows.at(curr_workflow); 
-			std::cout << "> Workflow: " << workflow.outcome << std::endl;
 
 			bool condition_pass{false};
 
 			for (const auto& condition : workflow.conditions) {
-				std::cout << "  > " << condition.packet << condition.operation << condition.threshold << " ? ";
 				long value{0};
 				if (condition.packet == 'x') { value = part.x; }
 				if (condition.packet == 'm') { value = part.m; }
@@ -120,11 +117,8 @@ long Day19::PartOne(const InputData& data) const {
 				if (condition_pass) {
 					outcome = condition.outcome;
 					curr_workflow = condition.outcome;
-					std::cout << "Yes -> " << outcome << std::endl;
 					break;
 				}
-
-				std::cout << "No" << std::endl;
 			}
 
 			if (!condition_pass) {
@@ -142,7 +136,178 @@ long Day19::PartOne(const InputData& data) const {
 }
 
 long Day19::PartTwo(const InputData& data) const {
-	return 2;
+	const auto& [workflows, _] = data;
+
+	Workflows backwards_workflows{};
+
+	long x_min {1}, x_max {4000};
+	long m_min {1}, m_max {4000};
+	long a_min {1}, a_max {4000};
+	long s_min {1}, s_max {4000};
+
+	std::string curr_workflow = "in";
+
+	struct Candidate
+	{
+		std::string next_search{};
+		std::string seq{};
+		long x_min {1}, x_max {4000};
+		long m_min {1}, m_max {4000};
+		long a_min {1}, a_max {4000};
+		long s_min {1}, s_max {4000};
+	};
+
+	std::vector<Candidate> candidates{};
+	std::queue<Candidate> search; search.push(Candidate{"in"});
+
+	while(!search.empty()) {
+		const auto cur_candidate = search.back(); search.pop();
+		std::cout << "> Current candidate: " << cur_candidate.next_search << std::endl;
+
+		const auto& workflow = workflows.at(cur_candidate.next_search);
+
+		for (const auto& condition : workflow.conditions) {
+			std::cout << "  > Condition: " << condition.packet << condition.operation << condition.threshold << " -> " << condition.outcome << std::endl;
+			if (condition.outcome == "R") {
+				std::cout << "    > The outcome of this condition is not desired." << std::endl;
+				continue;
+			}
+
+			Candidate new_candidate = cur_candidate;
+			new_candidate.next_search = condition.outcome;
+
+			if (condition.packet == 'x') {
+				std::cout << "    > Current range: " << cur_candidate.x_min << " " << cur_candidate.x_max << std::endl;
+				if (condition.operation == '<') {
+					if (new_candidate.x_min >= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.x_max >= condition.threshold) {
+						new_candidate.x_max = condition.threshold - 1;
+					}
+				} else {
+					if (new_candidate.x_max <= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.x_min <= condition.threshold) {
+						new_candidate.x_min = condition.threshold + 1;
+					}
+				}
+				std::cout << "    > Updated range: " << new_candidate.x_min << " " << new_candidate.x_max << std::endl;
+			} else if (condition.packet == 'm') {
+				std::cout << "    > Current range: " << cur_candidate.m_min << " " << cur_candidate.m_max << std::endl;
+				if (condition.operation == '<') {
+					if (new_candidate.m_min >= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.m_max >= condition.threshold) {
+						new_candidate.m_max = condition.threshold - 1;
+					}
+				} else {
+					if (new_candidate.m_max <= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.m_min <= condition.threshold) {
+						new_candidate.m_min = condition.threshold + 1;
+					}
+				}
+				std::cout << "    > Updated range: " << new_candidate.m_min << " " << new_candidate.m_max << std::endl;
+			} else if (condition.packet == 'a') {
+				std::cout << "    > Current range: " << cur_candidate.a_min << " " << cur_candidate.a_max << std::endl;
+				if (condition.operation == '<') {
+					if (new_candidate.a_min >= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.a_max >= condition.threshold) {
+						new_candidate.a_max = condition.threshold - 1;
+					}
+				} else {
+					if (new_candidate.a_max <= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.a_min <= condition.threshold) {
+						new_candidate.a_min = condition.threshold + 1;
+					}
+				}
+				std::cout << "    > Updated range: " << new_candidate.a_min << " " << new_candidate.a_max << std::endl;
+			} else if (condition.packet == 's') {
+				std::cout << "    > Current range: " << cur_candidate.s_min << " " << cur_candidate.s_max << std::endl;
+				if (condition.operation == '<') {
+					if (new_candidate.s_min >= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.s_max >= condition.threshold) {
+						new_candidate.s_max = condition.threshold - 1;
+					}
+				} else {
+					if (new_candidate.s_max <= condition.threshold) {
+						std::cout << "      > Impossible to reach condition." << std::endl;
+						continue;
+					}
+
+					if (new_candidate.s_min <= condition.threshold) {
+						new_candidate.s_min = condition.threshold + 1;
+					}
+				}
+				std::cout << "    > Updated range: " << new_candidate.s_min << " " << new_candidate.s_max << std::endl;
+			}
+
+			if (new_candidate.next_search == "A") {
+				std::cout << "    > A Candidate found!" << std::endl;
+				candidates.push_back(new_candidate);
+			} else {
+				std::cout << "    > Next search: " << new_candidate.next_search << std::endl;
+				search.push(new_candidate);
+			}
+		}
+
+		if (workflow.outcome == "A") {
+			candidates.push_back(cur_candidate);
+		} else if (workflow.outcome != "R") {
+			Candidate new_candidate = cur_candidate;
+			new_candidate.next_search = workflow.outcome;
+			search.push(new_candidate);
+		}
+	}
+
+	Candidate final_candidate{};
+	for (const auto& candidate : candidates) {
+		final_candidate.x_min = std::max(final_candidate.x_min, candidate.x_min);
+		final_candidate.m_min = std::max(final_candidate.m_min, candidate.m_min);
+		final_candidate.a_min = std::max(final_candidate.a_min, candidate.a_min);
+		final_candidate.s_min = std::max(final_candidate.s_min, candidate.s_min);
+
+		final_candidate.x_max = std::min(final_candidate.x_max, candidate.x_max);
+		final_candidate.m_max = std::min(final_candidate.m_max, candidate.m_max);
+		final_candidate.a_max = std::min(final_candidate.a_max, candidate.a_max);
+		final_candidate.s_max = std::min(final_candidate.s_max, candidate.s_max);
+	}
+
+	std::cout << "x " << final_candidate.x_min << " " << final_candidate.x_max << std::endl;
+	std::cout << "m " << final_candidate.m_min << " " << final_candidate.m_max << std::endl;
+	std::cout << "a " << final_candidate.a_min << " " << final_candidate.a_max << std::endl;
+	std::cout << "s " << final_candidate.s_min << " " << final_candidate.s_max << std::endl;
+
+	long result = (final_candidate.x_max - final_candidate.x_min) * 
+				  (final_candidate.m_max - final_candidate.m_min) *
+				  (final_candidate.a_max - final_candidate.a_min) *
+				  (final_candidate.s_max - final_candidate.s_min);
+	
+	return result;
 }
 
 int main(int argc, char* argv[]) {
